@@ -29,6 +29,7 @@ http://www.arduino.cc/en/Tutorial/BlinkWithoutDelay
 #include <Arduino.h>
 #include <SPI.h>
 #include <Adafruit_MAX31865.h>
+#include <Adafruit_MAX31856.h>
 
 const int LEDPin = 13; //LED_BUILTIN; // the number of a LED pin
 
@@ -43,32 +44,32 @@ const long interval = 1000; // interval at which to blink (msec)
 // Use software SPI: CS, DI, DO, CLK
 
 //                            originally (10, 11, 12, 13)
-Adafruit_MAX31865 max = Adafruit_MAX31865(9, 10, 11, 12);
+Adafruit_MAX31865 myRTD = Adafruit_MAX31865(9, 10, 11, 12); // chip select is pin 9
 // keeping pin 13 clear for use as indicator LED
 
+Adafruit_MAX31856 myThermocouple = Adafruit_MAX31856(8, 10, 11, 12); // chip select is pin 8
 
-// use hardware SPI, just pass in the CS pin
-//Adafruit_MAX31865 max = Adafruit_MAX31865(10);
 
 // The value of the Rref resistor. Use 430.0!
 #define RREF 430.0
 
-float temperature = 0;
+float tempRTD = 0;
+float tempThermo = 0;
+
 
 void setup()
 {
   Serial.begin(115200);
-  Serial.println("Adafruit MAX31865 PT100 Sensor Test!");
+  Serial.println("Temperature Sensors Tests.\n");
 
-  max.begin(MAX31865_3WIRE);  // set to 2WIRE or 4WIRE as necessary
+  myRTD.begin(MAX31865_3WIRE);  // set to 2WIRE or 4WIRE as necessary
+
+  myThermocouple.begin(); // type K Thermocouple
+  myThermocouple.setThermocoupleType(MAX31856_TCTYPE_K);
+
+
   pinMode(LEDPin, OUTPUT);
 }
-
-//  pinMode(7, OUTPUT);
-//  digitalWrite(7, HIGH);
-
-//  pinMode(6, OUTPUT);
-//  digitalWrite(6, HIGH);
 
 
 void loop()
@@ -76,12 +77,13 @@ void loop()
   unsigned long currentMillis = millis();
   //Serial.println(currentMillis);
 
-  uint16_t rtd = max.readRTD();
-  temperature = max.temperature(100, RREF);
+  //uint16_t rtd = myRTD.readRTD();
+  tempRTD = myRTD.temperature(100, RREF);
+  tempThermo = myThermocouple.readThermocoupleTemperature();
 
   //Serial.print("RTD value: "); Serial.println(rtd);
-  float ratio = rtd;
-  ratio /= 32768;
+  //float ratio = rtd;
+  //ratio /= 32768;
 
 
   if (currentMillis - previousMillis >= interval)
@@ -89,13 +91,16 @@ void loop()
     // save the last time you blinked the LED
     previousMillis = currentMillis;
 
-    if (temperature >= 28.0) ledState = HIGH; // (ledState == LOW) 
+    if ( (tempRTD >= 28.0) || (tempThermo >= 28.0) ) ledState = HIGH;
     else ledState = LOW;
 
     digitalWrite(LEDPin, ledState);
 
-    Serial.print("Resistance = "); Serial.println(RREF*ratio,8);
-    Serial.print("Temperature = "); Serial.println(temperature);
+    //Serial.print("Resistance = "); Serial.println(RREF*ratio,8);
+    Serial.print("RTD Temp = "); Serial.println(tempRTD);
+    Serial.print("\n");
+
+    Serial.print("Thermocouple Temp: "); Serial.println(tempThermo);
     Serial.print("\n");
   }
 }
@@ -115,12 +120,12 @@ void loop()
 // void loop()
 // {
 //
-//   uint16_t rtd = max.readRTD();
+//   uint16_t rtd = myRTD.readRTD();
 //   delay(500);
 //
 //
 //   // Check and print any faults
-//   uint8_t fault = max.readFault();
+//   uint8_t fault = myRTD.readFault();
 //   // if (fault) {
 //   //   Serial.print("Fault 0x"); Serial.println(fault, HEX);
 //   //   if (fault & MAX31865_FAULT_HIGHTHRESH) {
@@ -141,7 +146,7 @@ void loop()
 //   //   if (fault & MAX31865_FAULT_OVUV) {
 //   //     Serial.println("Under/Over voltage");
 //   //   }
-//     max.clearFault();
+//     myRTD.clearFault();
 //
 //   Serial.println();
 //   delay(250);
