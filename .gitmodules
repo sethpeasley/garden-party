@@ -1,0 +1,3 @@
+[submodule "lib/max31856"]
+	path = lib/max31856
+	url = git@github.com:adafruit/Adafruit_MAX31856.git
