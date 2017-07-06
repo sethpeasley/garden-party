@@ -10,7 +10,6 @@ Initializing code and main loop for Garden Party.
 #include <Arduino.h>
 #include <SPI.h>
 
-
 #include <Adafruit_MAX31865.h>
 #include <Adafruit_MAX31856.h>
 
@@ -83,13 +82,15 @@ void loop()
 
     //Serial.print("Resistance = "); Serial.println(RREF*ratio,8);
     Serial.print("RTD Temp = "); Serial.println(tempRTD);
-    Serial.print("\n");
+    //Serial.print("\n");
 
     Serial.print("Thermocouple Temp: "); Serial.println(tempThermo);
-    Serial.print("\n");
+    //Serial.print("\n");
 
     //DHT
+    Serial.print("DHT temperature: "); Serial.println(dht.readTemperature());
     Serial.print("DHT humidity: "); Serial.println(dht.readHumidity());
+    Serial.print("\n");
   }
 }
 
