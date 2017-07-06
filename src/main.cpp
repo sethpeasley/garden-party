@@ -4,10 +4,16 @@ Initializing code and main loop for Garden Party.
 
 */
 
+#include "Adafruit_Sensor.h"
+#include "DHT.h"
+
 #include <Arduino.h>
 #include <SPI.h>
+
+
 #include <Adafruit_MAX31865.h>
 #include <Adafruit_MAX31856.h>
+
 
 const int LEDPin = 13; //LED_BUILTIN; // the number of a LED pin
 int ledState = LOW; // LED state used to set the LED
@@ -16,10 +22,10 @@ int ledState = LOW; // LED state used to set the LED
 // hold time, because the value will quickly become too large for an int
 unsigned long previousMillis = 0; // stores last time LED updated
 
-const long interval = 1000; // interval at which to blink (msec)
+const long interval = 2000; // interval at which to blink (msec)
+//also the DHT sensor requires 2 seconds between reads.
 
 // Use software SPI: CS, DI, DO, CLK
-
 //                            originally (10, 11, 12, 13)
 Adafruit_MAX31865 myRTD = Adafruit_MAX31865(9, 10, 11, 12); // chip select is pin 9
 // keeping pin 13 clear for use as indicator LED
@@ -33,16 +39,23 @@ Adafruit_MAX31856 myThermocouple = Adafruit_MAX31856(8, 10, 11, 12); // chip sel
 float tempRTD = 0;
 float tempThermo = 0;
 
+//configure DHT
+#define DHTPIN 2
+#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
+DHT dht(DHTPIN, DHTTYPE);
+
 
 void setup()
 {
   Serial.begin(115200);
-  Serial.println("Temperature Sensors Tests.\n");
+  Serial.println("Sensors Testing Commence!\n");
 
   myRTD.begin(MAX31865_3WIRE);  // set to 2WIRE or 4WIRE as necessary
 
   myThermocouple.begin(); // type K Thermocouple
   myThermocouple.setThermocoupleType(MAX31856_TCTYPE_K);
+
+  dht.begin();
 
   pinMode(LEDPin, OUTPUT);
 }
@@ -51,15 +64,11 @@ void setup()
 void loop()
 {
   unsigned long currentMillis = millis();
-  //Serial.println(currentMillis);
 
   //uint16_t rtd = myRTD.readRTD();
   tempRTD = myRTD.temperature(100, RREF);
   tempThermo = myThermocouple.readThermocoupleTemperature();
 
-  //Serial.print("RTD value: "); Serial.println(rtd);
-  //float ratio = rtd;
-  //ratio /= 32768;
 
 
   if (currentMillis - previousMillis >= interval)
@@ -78,6 +87,9 @@ void loop()
 
     Serial.print("Thermocouple Temp: "); Serial.println(tempThermo);
     Serial.print("\n");
+
+    //DHT
+    Serial.print("DHT humidity: "); Serial.println(dht.readHumidity());
   }
 }
 
