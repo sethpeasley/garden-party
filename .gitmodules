@@ -1,9 +1,9 @@
 [submodule "lib/max31856"]
 	path = lib/max31856
-	url = git@github.com:adafruit/Adafruit_MAX31856.git
+	url = https://github.com/adafruit/Adafruit_MAX31856.git
 [submodule "lib/DHT22"]
 	path = lib/DHT22
-	url = git@github.com:adafruit/DHT-sensor-library.git
+	url = https://github.com/adafruit/DHT-sensor-library.git
 [submodule "lib/Adafruit_Sensor"]
 	path = lib/Adafruit_Sensor
 	url = git@github.com:adafruit/Adafruit_Sensor.git
