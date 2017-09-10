@@ -10,6 +10,6 @@
 [submodule "lib/Adafruit_MAX31865"]
 	path = lib/Adafruit_MAX31865
 	url = https://github.com/adafruit/Adafruit_MAX31865.git
-[submodule "lib/SHT1x"]
-	path = lib/SHT1x
-	url = https://github.com/practicalarduino/SHT1x.git
+[submodule "lib/sht1xalt"]
+	path = lib/sht1xalt
+	url = https://github.com/biogeo/sht1xalt.git
