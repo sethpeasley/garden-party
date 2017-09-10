@@ -4,8 +4,8 @@ Initializing code and main loop for Garden Party.
 
 */
 
-#include "Adafruit_Sensor.h"
-#include "DHT.h"
+#include <DHT.h>
+#include <Adafruit_Sensor.h>
 
 #include <Arduino.h>
 #include <SPI.h>
@@ -26,10 +26,24 @@ const long interval = 2000; // interval at which to blink (msec)
 
 // Use software SPI: CS, DI, DO, CLK
 //                            originally (10, 11, 12, 13)
-Adafruit_MAX31865 myRTD = Adafruit_MAX31865(9, 10, 11, 12); // chip select is pin 9
-// keeping pin 13 clear for use as indicator LED
+const int SPI_CLOCK = 12;
+const int SPI_DO = 11;
+const int SPI_DI = 10;
+const int SPI_CS_THERM = 9;
+const int SPI_CS_RTD = 8;
 
-Adafruit_MAX31856 myThermocouple = Adafruit_MAX31856(8, 10, 11, 12); // chip select is pin 8
+
+
+// keeping pin 13 clear for use as indicator LED
+Adafruit_MAX31856 myThermocouple = Adafruit_MAX31856(SPI_CS_THERM,
+                                                     SPI_DI,
+                                                     SPI_DO,
+                                                     SPI_CLOCK); // chip select is pin 8
+
+Adafruit_MAX31865 myRTD = Adafruit_MAX31865(SPI_CS_RTD,
+                                            SPI_DI,
+                                            SPI_DO,
+                                            SPI_CLOCK); // chip select is pin 9
 
 
 // The value of the Rref resistor. Use 430.0!
@@ -38,9 +52,9 @@ Adafruit_MAX31856 myThermocouple = Adafruit_MAX31856(8, 10, 11, 12); // chip sel
 float tempRTD = 0;
 float tempThermo = 0;
 
-//configure DHT
-#define DHTPIN 2
-#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
+//configure Humidity Detectors
+const uint8_t DHTPIN = 7;
+const uint8_t DHTTYPE= 22; //DHT22 style sensor
 DHT dht(DHTPIN, DHTTYPE);
 
 
