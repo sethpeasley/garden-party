@@ -14,30 +14,57 @@
 
     switch (sensor_kind)
     {
-      case RTD_2WIRE: //also RTD_4WIRE!
-
+      case RTD_2WIRE:
       {
         myRTD = new Adafruit_MAX31865(spi_cs, spi_mosi, spi_miso, spi_clk);
-        if (sensor_kind == RTD_4WIRE)
-        {
-          this -> myRTD -> begin(MAX31865_4WIRE);
-        }
-        else { this -> myRTD -> begin(MAX31865_2WIRE); }
-      }
+        this -> myRTD -> begin(MAX31865_2WIRE);
         break;
-
+      }
       case RTD_3WIRE:
       {
         myRTD = new Adafruit_MAX31865(spi_cs, spi_mosi, spi_miso, spi_clk);
         this -> myRTD -> begin(MAX31865_3WIRE);
-      }
         break;
+      }
+      case RTD_4WIRE:
+      {
+        myRTD = new Adafruit_MAX31865(spi_cs, spi_mosi, spi_miso, spi_clk);
+        this -> myRTD -> begin(MAX31865_4WIRE);
+        break;
+      }
 
+      case TCTYPE_B:
+      {
+        myThermocouple = new Adafruit_MAX31856(spi_cs, spi_mosi, spi_miso, spi_clk);
+        this -> myThermocouple -> begin();
+        this -> myThermocouple -> setThermocoupleType(MAX31856_TCTYPE_B);
+        break;
+      }
 
-      // TCTYPE_B = MAX31856_TCTYPE_B,
-      // TCTYPE_E = MAX31856_TCTYPE_E,
-      // TCTYPE_J = MAX31856_TCTYPE_J,
-      // TCTYPE_K = MAX31856_TCTYPE_K,
+      case TCTYPE_E:
+      {
+        myThermocouple = new Adafruit_MAX31856(spi_cs, spi_mosi, spi_miso, spi_clk);
+        this -> myThermocouple -> begin();
+        this -> myThermocouple -> setThermocoupleType(MAX31856_TCTYPE_E);
+        break;
+      }
+
+      case TCTYPE_J:
+      {
+        myThermocouple = new Adafruit_MAX31856(spi_cs, spi_mosi, spi_miso, spi_clk);
+        this -> myThermocouple -> begin();
+        this -> myThermocouple -> setThermocoupleType(MAX31856_TCTYPE_J);
+        break;
+      }
+
+      case TCTYPE_K:
+      {
+        myThermocouple = new Adafruit_MAX31856(spi_cs, spi_mosi, spi_miso, spi_clk);
+        this -> myThermocouple -> begin();
+        this -> myThermocouple -> setThermocoupleType(MAX31856_TCTYPE_K);
+        break;
+      }
+
       // TCTYPE_N = MAX31856_TCTYPE_N,
       // TCTYPE_R = MAX31856_TCTYPE_R,
       // TCTYPE_S = MAX31856_TCTYPE_S,

@@ -16,17 +16,19 @@ const float RREF = 430.0;
 
 
    typedef enum sensor_type {
-    RTD_2WIRE = MAX31865_2WIRE,
-    RTD_3WIRE = MAX31865_3WIRE,
-    RTD_4WIRE = MAX31865_4WIRE,
-    TCTYPE_B = MAX31856_TCTYPE_B,
-    TCTYPE_E = MAX31856_TCTYPE_E,
-    TCTYPE_J = MAX31856_TCTYPE_J,
-    TCTYPE_K = MAX31856_TCTYPE_K,
-    TCTYPE_N = MAX31856_TCTYPE_N,
-    TCTYPE_R = MAX31856_TCTYPE_R,
-    TCTYPE_S = MAX31856_TCTYPE_S,
-    TCTYPE_T = MAX31856_TCTYPE_T
+    RTD_2WIRE = 0, //MAX31865_2WIRE,
+    RTD_3WIRE = 1, // MAX31865_3WIRE,
+    RTD_4WIRE = 2, // MAX31865_4WIRE,
+    TCTYPE_B =  3, // MAX31856_TCTYPE_B,
+    TCTYPE_E =  4, // MAX31856_TCTYPE_E,
+    TCTYPE_J =  5, // MAX31856_TCTYPE_J,
+    TCTYPE_K =  6, // MAX31856_TCTYPE_K,
+    TCTYPE_N =  7, // MAX31856_TCTYPE_N,
+    TCTYPE_R =  8, // MAX31856_TCTYPE_R,
+    TCTYPE_S =  9, // MAX31856_TCTYPE_S,
+    TCTYPE_T = 10  // MAX31856_TCTYPE_T
+    // Note: not currently supporting the "voltage mode" settings which can be used
+    // in the MASC31856. See data sheet for more information.
   } sensor_type_t;
 
 
