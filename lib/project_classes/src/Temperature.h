@@ -14,9 +14,8 @@
 
 const float RREF = 430.0;
 
-namespace sensor_types
-{
-   enum sensor_type {
+
+   typedef enum sensor_type {
     RTD_2WIRE = MAX31865_2WIRE,
     RTD_3WIRE = MAX31865_3WIRE,
     RTD_4WIRE = MAX31865_4WIRE,
@@ -29,12 +28,11 @@ namespace sensor_types
     TCTYPE_S = MAX31856_TCTYPE_S,
     TCTYPE_T = MAX31856_TCTYPE_T
   } sensor_type_t;
-}
 
 
 class Temperature_Sensor {
  public:
-  Temperature_Sensor(sensor_types::sensor_type temp_Sensor, int8_t spi_cs, int8_t spi_mosi, int8_t spi_miso, int8_t spi_clk, int update_rate);
+  Temperature_Sensor(sensor_type temp_Sensor, int8_t spi_cs, int8_t spi_mosi, int8_t spi_miso, int8_t spi_clk, int update_rate);
   //Adafruit_MAX31865(int8_t spi_cs);
 
   // boolean begin(max31865_numwires_t x = MAX31865_2WIRE);

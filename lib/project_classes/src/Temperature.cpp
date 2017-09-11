@@ -5,7 +5,7 @@
 
 
   // Software (bitbang) SPI
-  Temperature_Sensor::Temperature_Sensor(sensor_types::sensor_type sensor_kind, int8_t spi_cs, int8_t spi_mosi, int8_t spi_miso, int8_t spi_clk, int update_rate)
+  Temperature_Sensor::Temperature_Sensor(sensor_type sensor_kind, int8_t spi_cs, int8_t spi_mosi, int8_t spi_miso, int8_t spi_clk, int update_rate)
   {
     _sclk = spi_clk;
     _cs = spi_cs;
@@ -14,23 +14,26 @@
 
     switch (sensor_kind)
     {
-      case sensor_types::RTD_2WIRE:
+      case RTD_2WIRE: //also RTD_4WIRE!
+
+      {
         myRTD = new Adafruit_MAX31865(spi_cs, spi_mosi, spi_miso, spi_clk);
-        //this -> myRTD -> begin(MAX31865_2WIRE);
+        if (sensor_kind == RTD_4WIRE)
+        {
+          this -> myRTD -> begin(MAX31865_4WIRE);
+        }
+        else { this -> myRTD -> begin(MAX31865_2WIRE); }
+      }
         break;
 
-      case sensor_types::RTD_3WIRE:
+      case RTD_3WIRE:
+      {
         myRTD = new Adafruit_MAX31865(spi_cs, spi_mosi, spi_miso, spi_clk);
-        //this -> myRTD -> begin(MAX31865_3WIRE);
-        break;
-
-      case sensor_types::RTD_4WIRE:
-        myRTD = new Adafruit_MAX31865(spi_cs, spi_mosi, spi_miso, spi_clk);
-        //this -> myRTD -> begin(MAX31865_4WIRE);
+        this -> myRTD -> begin(MAX31865_3WIRE);
+      }
         break;
 
 
-      // RTD_4WIRE = MAX31865_4WIRE,
       // TCTYPE_B = MAX31856_TCTYPE_B,
       // TCTYPE_E = MAX31856_TCTYPE_E,
       // TCTYPE_J = MAX31856_TCTYPE_J,
