@@ -34,10 +34,12 @@ const float RREF = 430.0;
 
 class Temperature_Sensor {
  public:
-  Temperature_Sensor(sensor_type temp_sensor, int8_t spi_chip_sel, int8_t spi_arduino_data_out, int8_t spi_arduino_data_in, int8_t spi_clock, int update_rate);
+  Temperature_Sensor(sensor_type temp_sensor, int8_t spi_chip_sel, int8_t spi_arduino_data_out,
+                    int8_t spi_arduino_data_in, int8_t spi_clock, int update_rate,
+                    float rtd_nominal = 100.0, float max31865_ref_resistor = 430.0);
   //Adafruit_MAX31865(int8_t spi_cs);
 
-  // boolean begin(max31865_numwires_t x = MAX31865_2WIRE);
+
   //
   // uint8_t readFault(void);
   // void clearFault(void);
@@ -50,10 +52,19 @@ class Temperature_Sensor {
   //
   // float temperature(float RTDnominal, float refResistor);
   void update();
+  float getTemperature();
 
  private:
+  sensor_type _sensor_kind;
   int8_t _spi_clock, _spi_chip_select, _spi_arduino_data_out, _spi_arduino_data_in;
-  int update_rate;
+  int _update_rate;
+  float _rtd_nominal, _reference_resistor;
+
+  Adafruit_MAX31856* myThermocouple;
+  Adafruit_MAX31865* myRTD;
+
+  float getRTD_temperature();
+  float getTC_temperature();
   //
   // void initDevice();
   // void readRegisterN(uint8_t addr, uint8_t buffer[], uint8_t n);
@@ -64,7 +75,6 @@ class Temperature_Sensor {
   // void     writeRegister8(uint8_t addr, uint8_t reg);
   // uint8_t spixfer(uint8_t addr);
 
-  Adafruit_MAX31856* myThermocouple;
-  Adafruit_MAX31865* myRTD;
+
 
 };

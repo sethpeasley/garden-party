@@ -3,12 +3,18 @@
 
 
   // Software (bitbang) SPI
-  Temperature_Sensor::Temperature_Sensor(sensor_type sensor_kind, int8_t spi_chip_sel, int8_t spi_arduino_data_out, int8_t spi_arduino_data_in, int8_t spi_clock, int update_rate)
+  Temperature_Sensor::Temperature_Sensor(sensor_type sensor_kind, int8_t spi_chip_sel,
+                                        int8_t spi_arduino_data_out, int8_t spi_arduino_data_in,
+                                        int8_t spi_clock, int update_rate,
+                                        float rtd_nominal, float max31865_ref_resistor)
   {
+    _sensor_kind = sensor_kind;
     _spi_clock = spi_clock;
     _spi_chip_select = spi_chip_sel;
     _spi_arduino_data_out = spi_arduino_data_out;
     _spi_arduino_data_in = spi_arduino_data_in;
+    _rtd_nominal =  rtd_nominal;
+    _reference_resistor = max31865_ref_resistor;
 
     switch (sensor_kind)
     {
@@ -90,9 +96,27 @@
       default:
         break;
     }
+  }
 
+  float Temperature_Sensor::getTemperature(void)
+  {
+    if ( (_sensor_kind == RTD_2WIRE) || (_sensor_kind == RTD_3WIRE) || (_sensor_kind == RTD_4WIRE) )
+    {
+      return getRTD_temperature();
+    }
 
+    else return getTC_temperature();
 
+  }
+
+  float Temperature_Sensor::getRTD_temperature()
+  {
+    return this -> myRTD -> temperature(_rtd_nominal, _reference_resistor);
+  }
+
+  float Temperature_Sensor::getTC_temperature()
+  {
+    return 0;
   }
 
   // // Hardware SPI init
