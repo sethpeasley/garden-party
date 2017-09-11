@@ -34,7 +34,7 @@ const float RREF = 430.0;
 
 class Temperature_Sensor {
  public:
-  Temperature_Sensor(sensor_type temp_Sensor, int8_t spi_cs, int8_t spi_mosi, int8_t spi_miso, int8_t spi_clk, int update_rate);
+  Temperature_Sensor(sensor_type temp_sensor, int8_t spi_chip_sel, int8_t spi_arduino_data_out, int8_t spi_arduino_data_in, int8_t spi_clock, int update_rate);
   //Adafruit_MAX31865(int8_t spi_cs);
 
   // boolean begin(max31865_numwires_t x = MAX31865_2WIRE);
@@ -52,7 +52,7 @@ class Temperature_Sensor {
   void update();
 
  private:
-  int8_t _sclk, _miso, _mosi, _cs;
+  int8_t _spi_clock, _spi_chip_select, _spi_arduino_data_out, _spi_arduino_data_in;
   int update_rate;
   //
   // void initDevice();
