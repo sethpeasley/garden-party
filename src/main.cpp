@@ -11,9 +11,12 @@ Initializing code and main loop for Garden Party.
 #include <Arduino.h>
 #include <SPI.h>
 
+
+
 #include <Adafruit_MAX31865.h>
 #include <Adafruit_MAX31856.h>
 
+#include <Temperature.h>
 
 
 
@@ -58,7 +61,7 @@ float tempThermo = 0;
 //configure Humidity Detectors
 const uint8_t DHTPIN = 7;
 const uint8_t DHTTYPE= 22; //DHT22 style sensor
-DHT dht(DHTPIN, DHTTYPE);
+DHT dht = DHT(DHTPIN, DHTTYPE);
 
 
 //configure moisture sensor
@@ -141,57 +144,3 @@ void loop()
     delay(100);
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-// void loop()
-// {
-//
-//   uint16_t rtd = myRTD.readRTD();
-//   delay(500);
-//
-//
-//   // Check and print any faults
-//   uint8_t fault = myRTD.readFault();
-//   // if (fault) {
-//   //   Serial.print("Fault 0x"); Serial.println(fault, HEX);
-//   //   if (fault & MAX31865_FAULT_HIGHTHRESH) {
-//   //     Serial.println("RTD High Threshold");
-//   //   }
-//   //   if (fault & MAX31865_FAULT_LOWTHRESH) {
-//   //     Serial.println("RTD Low Threshold");
-//   //   }
-//   //   if (fault & MAX31865_FAULT_REFINLOW) {
-//   //     Serial.println("REFIN- > 0.85 x Bias");
-//   //   }
-//   //   if (fault & MAX31865_FAULT_REFINHIGH) {
-//   //     Serial.println("REFIN- < 0.85 x Bias - FORCE- open");
-//   //   }
-//   //   if (fault & MAX31865_FAULT_RTDINLOW) {
-//   //     Serial.println("RTDIN- < 0.85 x Bias - FORCE- open");
-//   //   }
-//   //   if (fault & MAX31865_FAULT_OVUV) {
-//   //     Serial.println("Under/Over voltage");
-//   //   }
-//     myRTD.clearFault();
-//
-//   Serial.println();
-//   delay(250);
-//
-//   if (temperature >= 32.0)
-//   {digitalWrite(7, HIGH);
-//   Serial.println("here");
-// delay(500);}
-//   else digitalWrite(7, LOW);
-//
-// }
