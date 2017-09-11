@@ -5,6 +5,7 @@ Initializing code and main loop for Garden Party.
 */
 
 #include <DHT.h>
+#include <SHT1x.h>
 #include <Adafruit_Sensor.h>
 
 #include <Arduino.h>
@@ -14,6 +15,8 @@ Initializing code and main loop for Garden Party.
 #include <Adafruit_MAX31856.h>
 
 
+
+
 const int LEDPin = 13; //LED_BUILTIN; // the number of a LED pin
 int ledState = LOW; // LED state used to set the LED
 
@@ -21,7 +24,7 @@ int ledState = LOW; // LED state used to set the LED
 // hold time, because the value will quickly become too large for an int
 unsigned long previousMillis = 0; // stores last time LED updated
 
-const long interval = 2000; // interval at which to blink (msec)
+const long interval = 2500; // interval at which to blink (msec)
 //also the DHT sensor requires 2 seconds between reads.
 
 // Use software SPI: CS, DI, DO, CLK
@@ -58,6 +61,21 @@ const uint8_t DHTTYPE= 22; //DHT22 style sensor
 DHT dht(DHTPIN, DHTTYPE);
 
 
+//configure moisture sensor
+//#define dataPin 5
+//#define clockPin 4
+//SHT1x sht1x(dataPin, clockPin);
+
+
+#define dataPin 5
+#define clockPin 4
+#define clockPulse 1
+#define voltage sht1xalt::VOLTAGE_5V
+#define units sht1xalt::UNITS_CELCIUS
+sht1xalt::Sensor sensor(dataPin, clockPin, clockPulse, voltage, units);
+
+
+
 void setup()
 {
   Serial.begin(115200);
@@ -71,8 +89,16 @@ void setup()
   dht.begin();
 
   pinMode(LEDPin, OUTPUT);
+
+  sensor.configureConnection();
+  sensor.softReset();
+
+
+
 }
 
+float tempC = 0;
+float relHum = 0;
 
 void loop()
 {
@@ -84,7 +110,7 @@ void loop()
 
 
 
-  if (currentMillis - previousMillis >= interval)
+  if (currentMillis - previousMillis > interval)
   {
     // save the last time you blinked the LED
     previousMillis = currentMillis;
@@ -95,16 +121,24 @@ void loop()
     digitalWrite(LEDPin, ledState);
 
     //Serial.print("Resistance = "); Serial.println(RREF*ratio,8);
-    Serial.print("RTD Temp = "); Serial.println(tempRTD);
+//    Serial.print("RTD Temp = "); Serial.println(tempRTD);
     //Serial.print("\n");
 
-    Serial.print("Thermocouple Temp: "); Serial.println(tempThermo);
+//    Serial.print("Thermocouple Temp: "); Serial.println(tempThermo);
     //Serial.print("\n");
 
     //DHT
-    Serial.print("DHT temperature: "); Serial.println(dht.readTemperature());
-    Serial.print("DHT humidity: "); Serial.println(dht.readHumidity());
+//    Serial.print("DHT temperature: "); Serial.println(dht.readTemperature());
+//    Serial.print("DHT humidity: "); Serial.println(dht.readHumidity());
+//    Serial.print("\n");
+
+    //tempF = sht1x.readTemperatureF();
+    sensor.measure(tempC,relHum);
+    Serial.print("SHT1x temperature: "); Serial.println(tempC);
+    Serial.print("SHT1x humidity: "); Serial.println(relHum);
     Serial.print("\n");
+
+    delay(100);
   }
 }
 
