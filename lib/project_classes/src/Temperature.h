@@ -12,8 +12,10 @@
 #include <Adafruit_MAX31865.h>
 #include <Adafruit_MAX31856.h>
 
+#include <SPI.h>
+
 // This provides a more generic way to address the various devices we might use.
-typedef enum sensor_type
+typedef enum sensor_type_temperature
 {
   RTD_2WIRE = 0, //MAX31865_2WIRE,
   RTD_3WIRE = 1, // MAX31865_3WIRE,
@@ -28,7 +30,7 @@ typedef enum sensor_type
   TCTYPE_T = 10  // MAX31856_TCTYPE_T
   // Note: not currently supporting the "voltage mode" settings which can be used
   // in the MASC31856. See data sheet for more information.
-} sensor_type_t;
+} sensor_type_temperature_t;
 
 // Is the parameter being measured in the normal range, high, or low out of range?
 typedef enum channel_conditions
@@ -81,7 +83,7 @@ struct temperature_channel_status
 class Temperature_Sensor
 {
   public:
-    Temperature_Sensor(sensor_type temp_sensor, int8_t spi_chip_sel, int8_t spi_arduino_data_out,
+    Temperature_Sensor(sensor_type_temperature temp_sensor, int8_t spi_chip_sel, int8_t spi_arduino_data_out,
                     int8_t spi_arduino_data_in, int8_t spi_clock, unsigned long update_interval,
                     float alarm_low = 0.0, float alarm_high = 100.0, float alarm_deadband = 2.0,
                     float rtd_nominal = 100.0, float max31865_ref_resistor = 430.0);
@@ -101,7 +103,7 @@ class Temperature_Sensor
     unsigned long _previousUpdate = 0;
     unsigned long _currentMillis;
 
-    sensor_type _sensor_kind;
+    sensor_type_temperature _sensor_kind;
     int8_t _spi_clock, _spi_chip_select, _spi_arduino_data_out, _spi_arduino_data_in;
     unsigned long _update_interval;
     float _rtd_nominal, _reference_resistor;

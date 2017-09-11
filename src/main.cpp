@@ -4,17 +4,10 @@ Initializing code and main loop for Garden Party.
 
 */
 
-#include <DHT.h>
-#include <SHT1x.h>
-#include <Adafruit_Sensor.h>
-
 #include <Arduino.h>
-#include <SPI.h>
-
-#include <Adafruit_MAX31865.h>
-#include <Adafruit_MAX31856.h>
 
 #include <Temperature.h>
+#include <Humidity.h>
 
 
 const int LEDPin = 13; //LED_BUILTIN; // the number of a LED pin
@@ -48,7 +41,7 @@ float alarm_deadband = 2.0; // in degree celsius
 
 
 // Initialize the temperature objects.
-Temperature_Sensor myRTD(sensor_type::RTD_3WIRE,
+Temperature_Sensor myRTD(sensor_type_temperature::RTD_3WIRE,
                         SPI_CS_RTD,
                         SPI_DI,
                         SPI_DO,
@@ -61,7 +54,7 @@ Temperature_Sensor myRTD(sensor_type::RTD_3WIRE,
                         MAX31865_REFERENCE_RESISTOR);
 
 
-Temperature_Sensor myTC(sensor_type::TCTYPE_K,
+Temperature_Sensor myTC(sensor_type_temperature::TCTYPE_K,
                         SPI_CS_THERM,
                         SPI_DI,
                         SPI_DO,

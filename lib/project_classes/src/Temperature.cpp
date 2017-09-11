@@ -12,7 +12,7 @@
 
 
 // I used one large constructor to handle all both RTD and TC sensors.
-Temperature_Sensor::Temperature_Sensor(sensor_type sensor_kind, int8_t spi_chip_sel,
+Temperature_Sensor::Temperature_Sensor(sensor_type_temperature sensor_kind, int8_t spi_chip_sel,
                                       int8_t spi_arduino_data_out, int8_t spi_arduino_data_in,
                                       int8_t spi_clock, unsigned long update_interval,
                                       float alarm_low, float alarm_high, float alarm_deadband,
