@@ -24,7 +24,9 @@ int ledState = LOW; // LED state used to set the LED
 // hold time, because the value will quickly become too large for an int
 unsigned long previousMillis = 0; // stores last time LED updated
 
-const long UPDATE_INTERVAL = 2000; // interval at which to blink (msec)
+const unsigned long TEMPERATURE_UPDATE_INTERVAL = 500; // interval at which to blink (msec)
+const unsigned long HUMIDITY_UPDATE_INTERVAL = 2000;
+const unsigned long UI_UPDATE_INTERVAL = 1000;
 //also the DHT sensor requires 2 seconds between reads.
 
 // Use software SPI: CS, DI, DO, CLK
@@ -51,7 +53,7 @@ Temperature_Sensor myRTD(sensor_type::RTD_3WIRE,
                         SPI_DI,
                         SPI_DO,
                         SPI_CLOCK,
-                        UPDATE_INTERVAL,
+                        TEMPERATURE_UPDATE_INTERVAL,
                         alarm_low,
                         alarm_high,
                         alarm_deadband,
@@ -64,7 +66,7 @@ Temperature_Sensor myTC(sensor_type::TCTYPE_K,
                         SPI_DI,
                         SPI_DO,
                         SPI_CLOCK,
-                        UPDATE_INTERVAL,
+                        TEMPERATURE_UPDATE_INTERVAL,
                         alarm_low,
                         alarm_high,
                         alarm_deadband);
@@ -97,11 +99,15 @@ sht1xalt::Sensor sensor(dataPin, clockPin, clockPulse, voltage, units);
 
 void setup()
 {
-
   Serial.begin(115200);
   Serial.println("Sensors Testing Commence!\n");
 
   dht.begin();
+
+  //set_alarm_setpoints(alarm_low, alarm_high, alarm_deadband)
+  myRTD.set_alarm_setpoints(23.0, 26.0, 0.5);
+  myTC.set_alarm_setpoints(21.2, 27.8, 0.7);
+
 
   pinMode(LEDPin, OUTPUT);
 
@@ -112,41 +118,33 @@ void setup()
 float tempC = 0;
 float relHum = 0;
 temperature_channel_status RTD_data;
+temperature_channel_status TC_data;
 
 void loop()
 {
   unsigned long currentMillis = millis();
 
-  //uint16_t rtd = myRTD.readRTD();
-  //tempRTD = myRTD.temperature(100, RREF);
-
-  tempRTD = myRTD.getTemperature();
+  //update the internal states of the objects
   RTD_data = myRTD.update();
+  TC_data = myTC.update();
 
-  tempThermo = myTC.getTemperature();
+  // process any alarms
+  if ((RTD_data.channel_status == HIGH_OUT_OF_RANGE) ||
+      (RTD_data.channel_status == LOW_OUT_OF_RANGE) ||
+      (TC_data.channel_status == HIGH_OUT_OF_RANGE) ||
+      (TC_data.channel_status == LOW_OUT_OF_RANGE) )
+       ledState = HIGH;
+  else ledState = LOW;
 
+  digitalWrite(LEDPin, ledState);
 
-
-  if (currentMillis - previousMillis > UPDATE_INTERVAL)
+  if (currentMillis - previousMillis > UI_UPDATE_INTERVAL)
   {
-    // save the last time you blinked the LED
+    // last time the screen was updated.
     previousMillis = currentMillis;
 
-    if ( (tempRTD >= 28.0) || (tempThermo >= 28.0) ) ledState = HIGH;
-    else ledState = LOW;
-
-    digitalWrite(LEDPin, ledState);
-
-    //Serial.print("Resistance = "); Serial.println(RREF*ratio,8);
-
-    // Serial.print("RTD Temp = "); Serial.println(tempRTD);
-    // Serial.print("\n");
     Serial.print("RTD Temp = "); Serial.println(RTD_data.temperature);
-    Serial.print("\n");
-
-
-
-    Serial.print("Thermocouple Temp: "); Serial.println(tempThermo);
+    Serial.print("Thermocouple Temp: "); Serial.println(TC_data.temperature);
     Serial.print("\n");
 
     //DHT
