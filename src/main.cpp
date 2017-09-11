@@ -24,33 +24,51 @@ int ledState = LOW; // LED state used to set the LED
 // hold time, because the value will quickly become too large for an int
 unsigned long previousMillis = 0; // stores last time LED updated
 
-const long interval = 2500; // interval at which to blink (msec)
+const long UPDATE_INTERVAL = 2000; // interval at which to blink (msec)
 //also the DHT sensor requires 2 seconds between reads.
 
 // Use software SPI: CS, DI, DO, CLK
 //                            originally (10, 11, 12, 13)
+// keeping pin 13 clear for use as indicator LED
 const int SPI_CLOCK = 12;
-const int SPI_DO = 11;
+const int SPI_DO = 11; //WRT to Arduino
 const int SPI_DI = 10;
 const int SPI_CS_THERM = 9;
 const int SPI_CS_RTD = 8;
 
 
+const float MAX31865_REFERENCE_RESISTOR = 430.0;
+const float RTD_NOMINAL_RESISTANCE = 100.0;
 
-// keeping pin 13 clear for use as indicator LED
-Adafruit_MAX31856 myThermocouple = Adafruit_MAX31856(SPI_CS_THERM,
-                                                     SPI_DI,
-                                                     SPI_DO,
-                                                     SPI_CLOCK); // chip select is pin 8
-
-Adafruit_MAX31865 myRTD = Adafruit_MAX31865(SPI_CS_RTD,
-                                            SPI_DI,
-                                            SPI_DO,
-                                            SPI_CLOCK); // chip select is pin 9
+float alarm_low = 10.0; // in degrees celsius
+float alarm_high = 50.0;
+float alarm_deadband = 2.0; // in degree celsius
 
 
-// The value of the Rref resistor. Use 430.0!
-#define RREF 430.0
+// Initialize the temperature objects.
+Temperature_Sensor myRTD(sensor_type::RTD_3WIRE,
+                        SPI_CS_RTD,
+                        SPI_DI,
+                        SPI_DO,
+                        SPI_CLOCK,
+                        UPDATE_INTERVAL,
+                        alarm_low,
+                        alarm_high,
+                        alarm_deadband,
+                        RTD_NOMINAL_RESISTANCE,
+                        MAX31865_REFERENCE_RESISTOR);
+
+
+Temperature_Sensor myTC(sensor_type::TCTYPE_K,
+                        SPI_CS_THERM,
+                        SPI_DI,
+                        SPI_DO,
+                        SPI_CLOCK,
+                        UPDATE_INTERVAL,
+                        alarm_low,
+                        alarm_high,
+                        alarm_deadband);
+
 
 float tempRTD = 0;
 float tempThermo = 0;
@@ -76,15 +94,12 @@ sht1xalt::Sensor sensor(dataPin, clockPin, clockPulse, voltage, units);
 
 
 
+
 void setup()
 {
+
   Serial.begin(115200);
   Serial.println("Sensors Testing Commence!\n");
-
-  myRTD.begin(MAX31865_3WIRE);  // set to 2WIRE or 4WIRE as necessary
-
-  myThermocouple.begin(); // type K Thermocouple
-  myThermocouple.setThermocoupleType(MAX31856_TCTYPE_K);
 
   dht.begin();
 
@@ -92,25 +107,27 @@ void setup()
 
   sensor.configureConnection();
   sensor.softReset();
-
-
-
 }
 
 float tempC = 0;
 float relHum = 0;
+temperature_channel_status RTD_data;
 
 void loop()
 {
   unsigned long currentMillis = millis();
 
   //uint16_t rtd = myRTD.readRTD();
-  tempRTD = myRTD.temperature(100, RREF);
-  tempThermo = myThermocouple.readThermocoupleTemperature();
+  //tempRTD = myRTD.temperature(100, RREF);
+
+  tempRTD = myRTD.getTemperature();
+  RTD_data = myRTD.update();
+
+  tempThermo = myTC.getTemperature();
 
 
 
-  if (currentMillis - previousMillis > interval)
+  if (currentMillis - previousMillis > UPDATE_INTERVAL)
   {
     // save the last time you blinked the LED
     previousMillis = currentMillis;
@@ -121,11 +138,16 @@ void loop()
     digitalWrite(LEDPin, ledState);
 
     //Serial.print("Resistance = "); Serial.println(RREF*ratio,8);
-//    Serial.print("RTD Temp = "); Serial.println(tempRTD);
-    //Serial.print("\n");
 
-//    Serial.print("Thermocouple Temp: "); Serial.println(tempThermo);
-    //Serial.print("\n");
+    // Serial.print("RTD Temp = "); Serial.println(tempRTD);
+    // Serial.print("\n");
+    Serial.print("RTD Temp = "); Serial.println(RTD_data.temperature);
+    Serial.print("\n");
+
+
+
+    Serial.print("Thermocouple Temp: "); Serial.println(tempThermo);
+    Serial.print("\n");
 
     //DHT
 //    Serial.print("DHT temperature: "); Serial.println(dht.readTemperature());
@@ -133,10 +155,12 @@ void loop()
 //    Serial.print("\n");
 
     //tempF = sht1x.readTemperatureF();
-    sensor.measure(tempC,relHum);
-    Serial.print("SHT1x temperature: "); Serial.println(tempC);
-    Serial.print("SHT1x humidity: "); Serial.println(relHum);
-    Serial.print("\n");
+    // sensor.measure(tempC,relHum);
+    // Serial.print("SHT1x temperature: "); Serial.println(tempC);
+    // Serial.print("SHT1x humidity: "); Serial.println(relHum);
+    // Serial.print("\n");
+
+
 
     delay(100);
   }

@@ -6,6 +6,7 @@
   Temperature_Sensor::Temperature_Sensor(sensor_type sensor_kind, int8_t spi_chip_sel,
                                         int8_t spi_arduino_data_out, int8_t spi_arduino_data_in,
                                         int8_t spi_clock, int update_rate,
+                                        float alarm_low, float alarm_high, float alarm_deadband,
                                         float rtd_nominal, float max31865_ref_resistor)
   {
     _sensor_kind = sensor_kind;
@@ -13,84 +14,91 @@
     _spi_chip_select = spi_chip_sel;
     _spi_arduino_data_out = spi_arduino_data_out;
     _spi_arduino_data_in = spi_arduino_data_in;
+
+    _alarm_low = alarm_low;
+    _alarm_high = alarm_high;
+    _alarm_deadband = alarm_deadband;
+
     _rtd_nominal =  rtd_nominal;
     _reference_resistor = max31865_ref_resistor;
 
+    // Based on the input of the sensor to initialize, sensor_kind,
+    // initializes the channel
     switch (sensor_kind)
     {
       case RTD_2WIRE:
       {
-        myRTD = new Adafruit_MAX31865(spi_chip_sel, spi_arduino_data_out, spi_arduino_data_in, spi_clock);
-        this -> myRTD -> begin(MAX31865_2WIRE);
+       _myRTD = new Adafruit_MAX31865(spi_chip_sel, spi_arduino_data_out, spi_arduino_data_in, spi_clock);
+        this ->_myRTD -> begin(MAX31865_2WIRE);
         break;
       }
       case RTD_3WIRE:
       {
-        myRTD = new Adafruit_MAX31865(spi_chip_sel, spi_arduino_data_out, spi_arduino_data_in, spi_clock);
-        this -> myRTD -> begin(MAX31865_3WIRE);
+       _myRTD = new Adafruit_MAX31865(spi_chip_sel, spi_arduino_data_out, spi_arduino_data_in, spi_clock);
+        this ->_myRTD -> begin(MAX31865_3WIRE);
         break;
       }
       case RTD_4WIRE:
       {
-        myRTD = new Adafruit_MAX31865(spi_chip_sel, spi_arduino_data_out, spi_arduino_data_in, spi_clock);
-        this -> myRTD -> begin(MAX31865_4WIRE);
+       _myRTD = new Adafruit_MAX31865(spi_chip_sel, spi_arduino_data_out, spi_arduino_data_in, spi_clock);
+        this ->_myRTD -> begin(MAX31865_4WIRE);
         break;
       }
 
       case TCTYPE_B:
       {
-        myThermocouple = new Adafruit_MAX31856(spi_chip_sel, spi_arduino_data_out, spi_arduino_data_in, spi_clock);
-        this -> myThermocouple -> begin();
-        this -> myThermocouple -> setThermocoupleType(MAX31856_TCTYPE_B);
+        _myTC = new Adafruit_MAX31856(spi_chip_sel, spi_arduino_data_out, spi_arduino_data_in, spi_clock);
+        this -> _myTC -> begin();
+        this -> _myTC -> setThermocoupleType(MAX31856_TCTYPE_B);
         break;
       }
       case TCTYPE_E:
       {
-        myThermocouple = new Adafruit_MAX31856(spi_chip_sel, spi_arduino_data_out, spi_arduino_data_in, spi_clock);
-        this -> myThermocouple -> begin();
-        this -> myThermocouple -> setThermocoupleType(MAX31856_TCTYPE_E);
+        _myTC = new Adafruit_MAX31856(spi_chip_sel, spi_arduino_data_out, spi_arduino_data_in, spi_clock);
+        this -> _myTC -> begin();
+        this -> _myTC -> setThermocoupleType(MAX31856_TCTYPE_E);
         break;
       }
       case TCTYPE_J:
       {
-        myThermocouple = new Adafruit_MAX31856(spi_chip_sel, spi_arduino_data_out, spi_arduino_data_in, spi_clock);
-        this -> myThermocouple -> begin();
-        this -> myThermocouple -> setThermocoupleType(MAX31856_TCTYPE_J);
+        _myTC = new Adafruit_MAX31856(spi_chip_sel, spi_arduino_data_out, spi_arduino_data_in, spi_clock);
+        this -> _myTC -> begin();
+        this -> _myTC -> setThermocoupleType(MAX31856_TCTYPE_J);
         break;
       }
       case TCTYPE_K:
       {
-        myThermocouple = new Adafruit_MAX31856(spi_chip_sel, spi_arduino_data_out, spi_arduino_data_in, spi_clock);
-        this -> myThermocouple -> begin();
-        this -> myThermocouple -> setThermocoupleType(MAX31856_TCTYPE_K);
+        _myTC = new Adafruit_MAX31856(spi_chip_sel, spi_arduino_data_out, spi_arduino_data_in, spi_clock);
+        this -> _myTC -> begin();
+        this -> _myTC -> setThermocoupleType(MAX31856_TCTYPE_K);
         break;
       }
       case TCTYPE_N:
       {
-        myThermocouple = new Adafruit_MAX31856(spi_chip_sel, spi_arduino_data_out, spi_arduino_data_in, spi_clock);
-        this -> myThermocouple -> begin();
-        this -> myThermocouple -> setThermocoupleType(MAX31856_TCTYPE_N);
+        _myTC = new Adafruit_MAX31856(spi_chip_sel, spi_arduino_data_out, spi_arduino_data_in, spi_clock);
+        this -> _myTC -> begin();
+        this -> _myTC -> setThermocoupleType(MAX31856_TCTYPE_N);
         break;
       }
       case TCTYPE_R:
       {
-        myThermocouple = new Adafruit_MAX31856(spi_chip_sel, spi_arduino_data_out, spi_arduino_data_in, spi_clock);
-        this -> myThermocouple -> begin();
-        this -> myThermocouple -> setThermocoupleType(MAX31856_TCTYPE_R);
+        _myTC = new Adafruit_MAX31856(spi_chip_sel, spi_arduino_data_out, spi_arduino_data_in, spi_clock);
+        this -> _myTC -> begin();
+        this -> _myTC -> setThermocoupleType(MAX31856_TCTYPE_R);
         break;
       }
       case TCTYPE_S:
       {
-        myThermocouple = new Adafruit_MAX31856(spi_chip_sel, spi_arduino_data_out, spi_arduino_data_in, spi_clock);
-        this -> myThermocouple -> begin();
-        this -> myThermocouple -> setThermocoupleType(MAX31856_TCTYPE_S);
+        _myTC = new Adafruit_MAX31856(spi_chip_sel, spi_arduino_data_out, spi_arduino_data_in, spi_clock);
+        this -> _myTC -> begin();
+        this -> _myTC -> setThermocoupleType(MAX31856_TCTYPE_S);
         break;
       }
       case TCTYPE_T:
       {
-        myThermocouple = new Adafruit_MAX31856(spi_chip_sel, spi_arduino_data_out, spi_arduino_data_in, spi_clock);
-        this -> myThermocouple -> begin();
-        this -> myThermocouple -> setThermocoupleType(MAX31856_TCTYPE_T);
+        _myTC = new Adafruit_MAX31856(spi_chip_sel, spi_arduino_data_out, spi_arduino_data_in, spi_clock);
+        this -> _myTC -> begin();
+        this -> _myTC -> setThermocoupleType(MAX31856_TCTYPE_T);
         break;
       }
       default:
@@ -98,44 +106,133 @@
     }
   }
 
+  // Update the channel values for temperature, alarming conditions,
+  // faulting conditions, good/bad data, and the current setpoint values.
+  temperature_channel_status Temperature_Sensor::update()
+  {
+    temperature_channel_status current_channel_status;
+
+    current_channel_status.temperature = getTemperature();
+    current_channel_status.channel_status = status_setpoints();
+    current_channel_status.channel_fault = status_faults();
+    current_channel_status.alarm_settings[0] = _alarm_high;
+    current_channel_status.alarm_settings[1] = _alarm_low;
+    current_channel_status.alarm_settings[2] = _alarm_deadband;
+
+    return current_channel_status;
+  }
+
+
+
+  // Returns the status of the sensor, including fault conditions, alarming conditions,
+  // and the current temperature
+  channel_conditions Temperature_Sensor::status_setpoints()
+  {
+    float temperature = getTemperature();
+
+    if (temperature > (_alarm_high + _alarm_deadband) ) return HIGH_OUT_OF_RANGE;
+    else if (temperature < (_alarm_low + _alarm_deadband) ) return LOW_OUT_OF_RANGE;
+    else return NORMAL;
+  }
+
+
+  fault_values Temperature_Sensor::status_faults()
+  {
+    if ( (_sensor_kind == RTD_2WIRE) || (_sensor_kind == RTD_3WIRE) || (_sensor_kind == RTD_4WIRE) )
+    {
+      uint8_t fault = this -> _myRTD -> readFault();
+      switch (fault)
+      {
+        case 0:
+          return NO_FAULT;
+          break;
+        case MAX31865_FAULT_HIGHTHRESH:
+          return RTD_FAULT_HIGHTHRESH;
+          break;
+        case MAX31865_FAULT_LOWTHRESH:
+          return RTD_FAULT_LOWTHRESH;
+          break;
+        case MAX31865_FAULT_REFINLOW:
+          return RTD_FAULT_REFINLOW;
+          break;
+        case MAX31865_FAULT_REFINHIGH:
+          return RTD_FAULT_REFINHIGH;
+          break;
+        case MAX31865_FAULT_RTDINLOW:
+          return RTD_FAULT_RTDINLOW;
+          break;
+        case MAX31865_FAULT_OVUV:
+          return RTD_FAULT_OVUV;
+          break;
+        default:
+          return NO_FAULT;
+          break;
+      }
+      this -> _myRTD -> clearFault();
+    }
+    else
+    {
+      uint8_t fault = this -> _myTC -> readFault();
+      switch (fault)
+      {
+        case 0:
+          return NO_FAULT;
+          break;
+        case MAX31856_FAULT_CJRANGE:
+          return TC_FAULT_CJRANGE;
+          break;
+        case MAX31856_FAULT_TCRANGE:
+          return TC_FAULT_TCRANGE;
+          break;
+        case MAX31856_FAULT_CJHIGH:
+          return TC_FAULT_CJHIGH;
+          break;
+        case MAX31856_FAULT_CJLOW:
+          return TC_FAULT_CJLOW;
+          break;
+        case MAX31856_FAULT_TCHIGH:
+          return TC_FAULT_TCHIGH;
+          break;
+        case MAX31856_FAULT_TCLOW:
+          return TC_FAULT_TCLOW;
+          break;
+        case MAX31856_FAULT_OVUV:
+          return TC_FAULT_OVUV;
+          break;
+        case MAX31856_FAULT_OPEN:
+          return TC_FAULT_OPEN;
+          break;
+        default:
+          return NO_FAULT;
+          break;
+      }
+      //The thermocouple library does not have a clearFault() method.
+    }
+  }
+
+
+
+  // Calls the appropriate function to return the TC or RTD temperature value
   float Temperature_Sensor::getTemperature(void)
   {
     if ( (_sensor_kind == RTD_2WIRE) || (_sensor_kind == RTD_3WIRE) || (_sensor_kind == RTD_4WIRE) )
     {
       return getRTD_temperature();
     }
-
     else return getTC_temperature();
-
   }
 
   float Temperature_Sensor::getRTD_temperature()
   {
-    return this -> myRTD -> temperature(_rtd_nominal, _reference_resistor);
+    return this ->_myRTD -> temperature(_rtd_nominal, _reference_resistor);
   }
 
   float Temperature_Sensor::getTC_temperature()
   {
-    return 0;
+    return this -> _myTC -> readThermocoupleTemperature();
   }
 
-  // // Hardware SPI init
-  // Adafruit_MAX31856::Adafruit_MAX31856(int8_t spi_cs) {
-  //   _cs = spi_cs;
-  //   _sclk = _miso = _mosi = -1;
-  // }
-  //
-  // boolean Adafruit_MAX31856::begin(void) {
-  //   pinMode(_cs, OUTPUT);
-  //   digitalWrite(_cs, HIGH);
-  //
-  //   if (_sclk != -1) {
-  //     //define pin modes
-  //     pinMode(_sclk, OUTPUT);
-  //     pinMode(_mosi, OUTPUT);
-  //     pinMode(_miso, INPUT);
-  //   } else {
-  //     //start and configure hardware SPI
-  //     SPI.begin();
-  //   }
-  // }
+
+
+
+//float _alarm_low, _alarm_high, _alarm_deadband;
