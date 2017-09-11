@@ -11,13 +11,10 @@ Initializing code and main loop for Garden Party.
 #include <Arduino.h>
 #include <SPI.h>
 
-
-
 #include <Adafruit_MAX31865.h>
 #include <Adafruit_MAX31856.h>
 
 #include <Temperature.h>
-
 
 
 const int LEDPin = 13; //LED_BUILTIN; // the number of a LED pin
