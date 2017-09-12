@@ -11,16 +11,16 @@
  #include <Adafruit_Sensor.h>
  #include <DHT.h>
  #include <SHT1x.h>
-
-
+ #include <sht1xalt.h>
 
  typedef enum sensor_type_humidity
  {
-   HUM_SHT10 =   1, // SHT10
-   HUM_DHT11 =  11, // DHT11
-   HUM_DHT22 =  22, // DHT22
-   HUM_DHT21 =  21, // DHT21
-   HUM_AM2301 = 21 // AM2301
+    // =  0, // SHT10
+   HUM_DHT11, // =  1, // DHT11
+   HUM_DHT22, // =  2, // DHT22
+   HUM_DHT21, // =  3, // DHT21
+   HUM_AM2301, // = 4  // AM2301
+   HUM_SHT10
  } sensor_type_humidity_t;
 
 
@@ -71,9 +71,9 @@ typedef enum channel_conditions_humidity_temperature
 
 class Humidity_Sensor
 {
-public:
-  Humidity_Sensor(sensor_type_humidity humid_sensor, uint8_t data_pin,
-                  int clock_pin, unsigned int clock_pulse_width,
+public:         // sensor_type_humidity humidity_sensor,
+  Humidity_Sensor(unsigned int  sensor_kind, unsigned int data_pin,
+                  int clock_pin, word clock_pulse_width,
                   unsigned long update_interval,
                   float sensor_high_humidity_setpoint = 100.0, float sensor_low_humidity_setpoint = 0.0,
                   float sensor_deadband_humidity_setpoint = 2.0, float sensor_high_temperature_setpoint = 100.0,
@@ -97,10 +97,11 @@ private:
   unsigned long _currentMillis;
   unsigned long _update_interval;
 
-  sensor_type_humidity _sensor_kind;
+  //sensor_type_humidity _sensor_kind;
+  unsigned int _sensor_kind;
   uint8_t _data_pin;
   int _clock_pin;
-  unsigned int _clock_pulse_width;
+  word _clock_pulse_width;
   sht1xalt::voltage_t _sensor_voltage;
   sht1xalt::temp_units_t _expressed_units;
 
@@ -119,10 +120,6 @@ private:
 
   channel_conditions_humidity status_setpoints_humidity();
   channel_conditions_humidity_temperature status_setpoints_humidity_temperature();
-
-  // float getRTD_temperature();
-  // float getTC_temperature();
-  // channel_conditions_temperature status_setpoints();
   fault_values_humidity status_faults();
   //------------------------------------- private member methods
 

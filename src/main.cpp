@@ -65,22 +65,57 @@ Temperature_Sensor myTC(sensor_type_temperature::TCTYPE_K,
                         alarm_deadband);
 
 
-float tempRTD = 0;
-float tempThermo = 0;
+
 
 //configure Humidity Detectors
-const uint8_t DHTPIN = 7;
-const uint8_t DHTTYPE= 22; //DHT22 style sensor
-DHT dht = DHT(DHTPIN, DHTTYPE);
 
+
+//DHT Sensor0
+uint8_t HUMIDITY_SENSOR_0_DATA_PIN = 7;
+const unsigned int HUMIDITY_SENSOR_0_TYPE = 22;// HUM_DHT22; //DHT22 style sensor
+float humidity_setpoint_hi = 95.0;
+float humidity_setpoint_lo = 5.0;// in Relative humidity
+float humidity_setpoint_deadband = 2.5;
+float humidity_temperature_setpoint_hi = 50.0; // in degrees celsius
+float humidity_temperature_setpoint_lo = 10.0;
+float humidity_temperature_setpoint_deadband = 2.0;
+//DHT dht = DHT(DHTPIN, DHTTYPE);
+
+Humidity_Sensor dht0(HUMIDITY_SENSOR_0_TYPE,
+                    HUMIDITY_SENSOR_0_DATA_PIN,
+                    0,
+                    0,
+                    HUMIDITY_UPDATE_INTERVAL,
+                    humidity_setpoint_hi, humidity_setpoint_lo,
+                    humidity_setpoint_deadband, humidity_temperature_setpoint_hi,
+                    humidity_temperature_setpoint_lo, humidity_temperature_setpoint_deadband,
+                    sht1xalt::VOLTAGE_5V, sht1xalt::UNITS_CELCIUS);
 
 //configure moisture sensor
-#define dataPin 5
-#define clockPin 4
-#define clockPulse 1
-#define voltage sht1xalt::VOLTAGE_5V
-#define units sht1xalt::UNITS_CELCIUS
-sht1xalt::Sensor sensor(dataPin, clockPin, clockPulse, voltage, units);
+// #define dataPin 5
+// #define clockPin 4
+// #define clockPulse 1
+// #define voltage sht1xalt::VOLTAGE_5V
+// #define units sht1xalt::UNITS_CELCIUS
+//sht1xalt::Sensor sensor(dataPin, clockPin, clockPulse, voltage, units);
+
+uint8_t HUMIDITY_SENSOR_1_DATA_PIN = 5;
+const int HUMIDITY_SENSOR_1_CLOCK_PIN = 4;
+const unsigned int HUMIDITY_SENSOR_1_TYPE = 2;// SHT1x
+const int HUMIDITY_SENSOR_1_CLOCK_PULSE_WIDTH = 1;
+const sht1xalt::voltage_t HUMIDITY_SENSOR_1_VOLTAGE = sht1xalt::VOLTAGE_5V;
+const sht1xalt::temp_units_t HUMIDITY_SENSOR_1_UNITS = sht1xalt::UNITS_CELCIUS;
+Humidity_Sensor blurn(HUMIDITY_SENSOR_1_TYPE,
+                      HUMIDITY_SENSOR_1_DATA_PIN,
+                      HUMIDITY_SENSOR_1_CLOCK_PIN,
+                      HUMIDITY_SENSOR_1_CLOCK_PULSE_WIDTH,
+                      HUMIDITY_UPDATE_INTERVAL,
+                      humidity_setpoint_hi, humidity_setpoint_lo,
+                      humidity_setpoint_deadband, humidity_temperature_setpoint_hi,
+                      humidity_temperature_setpoint_lo, humidity_temperature_setpoint_deadband,
+                      HUMIDITY_SENSOR_1_VOLTAGE, HUMIDITY_SENSOR_1_UNITS);
+
+
 
 
 
@@ -107,6 +142,8 @@ float tempC = 0;
 float relHum = 0;
 temperature_channel_status RTD_data;
 temperature_channel_status TC_data;
+humidity_channel_status humid0_data;
+humidity_channel_status humid1_data;
 
 void loop()
 {
@@ -115,6 +152,8 @@ void loop()
   //update the internal states of the objects
   RTD_data = myRTD.update();
   TC_data = myTC.update();
+  humid0_data = dht0.update();
+  //humid1_data = blurn.update();
 
   // process any alarms
   if ((RTD_data.channel_status == HIGH_OUT_OF_RANGE) ||
@@ -133,19 +172,26 @@ void loop()
 
     Serial.print("RTD Temp = "); Serial.println(RTD_data.temperature);
     Serial.print("Thermocouple Temp: "); Serial.println(TC_data.temperature);
-    Serial.print("\n");
+  //  Serial.print("\n");
 
     //DHT
-//    Serial.print("DHT temperature: "); Serial.println(dht.readTemperature());
-//    Serial.print("DHT humidity: "); Serial.println(dht.readHumidity());
-//    Serial.print("\n");
+    Serial.print("DHT temperature: "); Serial.println(humid0_data.temperature);
+    Serial.print("DHT humidity: "); Serial.println(humid0_data.humidity);
+    //Serial.print("\n");
 
     //tempF = sht1x.readTemperatureF();
     // sensor.measure(tempC,relHum);
+
+
+    // Serial.print("SHT1x temperature: "); Serial.println(humid1_data.temperature);
+    // Serial.print("SHT1x humidity: "); Serial.println(humid1_data.humidity);
+    // Serial.print("\n");
+
+
+    // sensor.measure(tempC, relHum);
     // Serial.print("SHT1x temperature: "); Serial.println(tempC);
     // Serial.print("SHT1x humidity: "); Serial.println(relHum);
     // Serial.print("\n");
-
 
 
     //delay(100);

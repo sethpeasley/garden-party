@@ -12,16 +12,17 @@
 
 
 
-Humidity_Sensor::Humidity_Sensor(sensor_type_humidity humid_sensor,
-                                uint8_t data_pin, int clock_pin,
-                                unsigned int clock_pulse_width,
+                                //sensor_type_humidity sensor_kind
+Humidity_Sensor::Humidity_Sensor(unsigned int sensor_kind,
+                                unsigned int data_pin, int clock_pin,
+                                word clock_pulse_width,
                                 unsigned long update_interval,
                                 float sensor_high_humidity_setpoint, float sensor_low_humidity_setpoint,
                                 float sensor_deadband_humidity_setpoint, float sensor_high_temperature_setpoint,
                                 float sensor_low_temperature_setpoint, float sensor_deadband_temperature_setpoint,
                                 sht1xalt::voltage_t sensor_voltage, sht1xalt::temp_units_t expressed_units)
 {
-  _sensor_kind = humid_sensor;
+  _sensor_kind = sensor_kind;
   _data_pin = data_pin;
   _clock_pin = clock_pin;
   _clock_pulse_width = clock_pulse_width;
@@ -42,39 +43,48 @@ Humidity_Sensor::Humidity_Sensor(sensor_type_humidity humid_sensor,
   // initializes the channel
   switch (_sensor_kind)
   {
-    case HUM_SHT10:
+    Serial.println("here 1");
+    case 2:
     {
       _mySHT1x = new sht1xalt::Sensor(_data_pin, _clock_pin, _clock_pulse_width, _sensor_voltage, _expressed_units);
+      delay(2000);
       this -> _mySHT1x -> configureConnection();
       this -> _mySHT1x -> softReset();
+      Serial.println("here 2");
       break;
     }
 
-    case HUM_DHT11:
+    case 11: // DHT11
     {
-      _myDHT = new DHT(_data_pin, _sensor_kind);
+      _myDHT = new DHT(_data_pin, 11);
       this -> _myDHT -> begin();
       break;
     }
+    case 21: // DHT21
+    {
+      _myDHT = new DHT(_data_pin, 21);
+      this -> _myDHT -> begin();
+      break;
+    }
+    case 22: //DHT22
+    {
+      Serial.println("here 22");
 
-    case HUM_DHT21: //Also the AM2301
-    {
-      _myDHT = new DHT(_data_pin, _sensor_kind);
+      _myDHT = new DHT(_data_pin, 22);
       this -> _myDHT -> begin();
       break;
     }
-
-    case HUM_DHT22:
+    case 23: //AM2301
     {
-      _myDHT = new DHT(_data_pin, _sensor_kind);
+      _myDHT = new DHT(_data_pin, 21);
       this -> _myDHT -> begin();
       break;
     }
+    default:
+      break;
   }
-
-
-
 }
+
 
 
 // Update the channel values for humidyt and temperature, alarming conditions,
@@ -108,7 +118,7 @@ humidity_channel_status Humidity_Sensor::update()
 }
 
 
-
+// Provides the humidty value.
 float Humidity_Sensor::getHumidity()
 {
   if (_sensor_kind == HUM_SHT10)
@@ -123,6 +133,8 @@ float Humidity_Sensor::getHumidity()
   }
 }
 
+// These humidity sensors also have a thermistor for temperature. It's not as
+// accurate as other temperature sources, but it's here, let's use it.
 float Humidity_Sensor::getTemperature()
 {
   if (_sensor_kind == HUM_SHT10)
@@ -137,8 +149,7 @@ float Humidity_Sensor::getTemperature()
   }
 }
 
-// Provides the status of the sensor, including fault conditions, alarming conditions,
-// and the current temperature
+// Calculates if the channel is in band WRT humidity.
 channel_conditions_humidity Humidity_Sensor::status_setpoints_humidity()
 {
   float humidity = getHumidity();
@@ -148,6 +159,7 @@ channel_conditions_humidity Humidity_Sensor::status_setpoints_humidity()
   else return HUMIDITY_NORMAL;
 }
 
+// Calculates if the channel is in band WRT temperature.
 channel_conditions_humidity_temperature Humidity_Sensor::status_setpoints_humidity_temperature()
 {
   float temperature = getTemperature();
@@ -157,24 +169,24 @@ channel_conditions_humidity_temperature Humidity_Sensor::status_setpoints_humidi
   else return HUMIDITY_TEMPERATURE_NORMAL;
 }
 
-
+// Provides the status code for any faults.
 fault_values_humidity Humidity_Sensor::status_faults()
 {
   return NO_FAULTS; // placeholder, come bck to this later
 }
 
 
-
-// Provides a means to update the alarm setpoints after the object is
-// constructed.
 void Humidity_Sensor::set_alarm_setpoints_humidity(float sensor_high_humidity_setpoint, float sensor_low_humidity_setpoint, float sensor_deadband_humidity_setpoint)
+// Provides a means to update the humidity alarm setpoints after the object is
+// constructed.
 {
   _sensor_high_humidity_setpoint = sensor_high_humidity_setpoint;
   _sensor_low_humidity_setpoint = sensor_low_humidity_setpoint;
   _sensor_deadband_humidity_setpoint = sensor_deadband_humidity_setpoint;
 }
 
-
+// Provides a means to update the temperature alarm setpoints after the object is
+// constructed.
 void Humidity_Sensor::set_alarm_setpoints_temperature(float sensor_high_temperature_setpoint, float sensor_low_temperature_setpoint, float sensor_deadband_temperature_setpoint)
 {
   _sensor_high_temperature_setpoint = sensor_high_temperature_setpoint;
