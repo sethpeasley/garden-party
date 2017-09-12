@@ -15,7 +15,7 @@
 Temperature_Sensor::Temperature_Sensor(sensor_type_temperature sensor_kind, int8_t spi_chip_sel,
                                       int8_t spi_arduino_data_out, int8_t spi_arduino_data_in,
                                       int8_t spi_clock, unsigned long update_interval,
-                                      float alarm_low, float alarm_high, float alarm_deadband,
+                                      float alarm_high_setpoint, float alarm_low_setpoint, float alarm_deadband_setpoint,
                                       float rtd_nominal, float max31865_ref_resistor)
 {
   _sensor_kind = sensor_kind;
@@ -25,17 +25,18 @@ Temperature_Sensor::Temperature_Sensor(sensor_type_temperature sensor_kind, int8
   _spi_arduino_data_in = spi_arduino_data_in;
 
   _update_interval = update_interval;
+  _previousUpdate = 0;
 
-  _alarm_low = alarm_low;
-  _alarm_high = alarm_high;
-  _alarm_deadband = alarm_deadband;
+  _alarm_low_setpoint = alarm_low_setpoint;
+  _alarm_high_setpoint = alarm_high_setpoint;
+  _alarm_deadband_setpoint = alarm_deadband_setpoint;
 
   _rtd_nominal =  rtd_nominal;
   _reference_resistor = max31865_ref_resistor;
 
   // Based on the input of the sensor to initialize, sensor_kind,
   // initializes the channel
-  switch (sensor_kind)
+  switch (_sensor_kind)
   {
     case RTD_2WIRE:
     {
@@ -131,36 +132,36 @@ temperature_channel_status Temperature_Sensor::update()
     _current_channel_status.temperature = getTemperature();
     _current_channel_status.channel_status = status_setpoints();
     _current_channel_status.channel_fault = status_faults();
-    _current_channel_status.alarm_settings[0] = _alarm_high;
-    _current_channel_status.alarm_settings[1] = _alarm_low;
-    _current_channel_status.alarm_settings[2] = _alarm_deadband;
+    _current_channel_status.alarm_settings[0] = _alarm_low_setpoint;
+    _current_channel_status.alarm_settings[1] = _alarm_high_setpoint;
+    _current_channel_status.alarm_settings[2] = _alarm_deadband_setpoint;
   }
   return _current_channel_status;
 }
 
 // Changes the object's alarm setpoints after the object has been created.
 // Allows for more flexibility with alarming channels.
-void Temperature_Sensor::set_alarm_setpoints(float alarm_low, float alarm_high, float alarm_deadband)
+void Temperature_Sensor::set_alarm_setpoints(float alarm_low_setpoint, float alarm_high_setpoint, float alarm_deadband_setpoint)
 {
-  _alarm_low = alarm_low;
-  _alarm_high = alarm_high;
-  _alarm_deadband = alarm_deadband;
+  _alarm_low_setpoint = alarm_low_setpoint;
+  _alarm_high_setpoint = alarm_high_setpoint;
+  _alarm_deadband_setpoint = alarm_deadband_setpoint;
 }
 
 
 // Provides the status of the sensor, including fault conditions, alarming conditions,
 // and the current temperature
-channel_conditions Temperature_Sensor::status_setpoints()
+channel_conditions_temperature Temperature_Sensor::status_setpoints()
 {
   float temperature = getTemperature();
 
-  if (temperature > (_alarm_high + _alarm_deadband) ) return HIGH_OUT_OF_RANGE;
-  else if (temperature < (_alarm_low + _alarm_deadband) ) return LOW_OUT_OF_RANGE;
+  if (temperature > (_alarm_high_setpoint + _alarm_deadband_setpoint) ) return HIGH_OUT_OF_RANGE;
+  else if (temperature < (_alarm_low_setpoint + _alarm_deadband_setpoint) ) return LOW_OUT_OF_RANGE;
   else return NORMAL;
 }
 
 // Provides any fault conditions that may exist in the channel.
-fault_values Temperature_Sensor::status_faults()
+fault_values_temperatures Temperature_Sensor::status_faults()
 {
   if ( (_sensor_kind == RTD_2WIRE) || (_sensor_kind == RTD_3WIRE) || (_sensor_kind == RTD_4WIRE) )
   {

@@ -33,16 +33,16 @@ typedef enum sensor_type_temperature
 } sensor_type_temperature_t;
 
 // Is the parameter being measured in the normal range, high, or low out of range?
-typedef enum channel_conditions
+typedef enum channel_conditions_temperature
 {
   NORMAL,
   HIGH_OUT_OF_RANGE,
   LOW_OUT_OF_RANGE
-} channel_conditions_t;
+} channel_conditions_temperature_t;
 
 // The library from Adafruit provides fault information. This information can be
 // used to assess if the channel has good data.
-typedef enum fault_values
+typedef enum fault_values_temperatures
 {
   NO_FAULT,             // Normal No Fault Condition
 
@@ -61,7 +61,7 @@ typedef enum fault_values
   TC_FAULT_TCLOW,       // MAX31856_FAULT_TCLOW
   TC_FAULT_OVUV,         // MAX31856_FAULT_OVUV
   TC_FAULT_OPEN         // MAX31856_FAULT_OPEN
-} fault_values_t;
+} fault_values_temperatures_t;
 
 // Structure provided to the outside world. Contains the last measured
 // temperature, if the channel is high/normal/low in band, if the signal
@@ -73,10 +73,10 @@ typedef enum fault_values
 struct temperature_channel_status
 {
   float temperature;
-  channel_conditions channel_status;
-  fault_values channel_fault;
+  channel_conditions_temperature channel_status;
+  fault_values_temperatures channel_fault;
   bool is_data_good;
-  float alarm_settings[3];
+  float alarm_settings[3]; // temp lo, hi, deadband
 };
 
 //This class has one constructor for use in both RTD and Thermocouple applications.
@@ -85,7 +85,7 @@ class Temperature_Sensor
   public:
     Temperature_Sensor(sensor_type_temperature temp_sensor, int8_t spi_chip_sel, int8_t spi_arduino_data_out,
                     int8_t spi_arduino_data_in, int8_t spi_clock, unsigned long update_interval,
-                    float alarm_low = 0.0, float alarm_high = 100.0, float alarm_deadband = 2.0,
+                    float alarm_high_setpoint = 100.0, float alarm_low_setpoint = 0.0, float alarm_deadband_setpoint = 2.0,
                     float rtd_nominal = 100.0, float max31865_ref_resistor = 430.0);
 
 
@@ -100,14 +100,15 @@ class Temperature_Sensor
 
   private:
     //private member data -------------------------------------
-    unsigned long _previousUpdate = 0;
+    unsigned long _previousUpdate;
     unsigned long _currentMillis;
+    unsigned long _update_interval;
 
     sensor_type_temperature _sensor_kind;
     int8_t _spi_clock, _spi_chip_select, _spi_arduino_data_out, _spi_arduino_data_in;
-    unsigned long _update_interval;
+
     float _rtd_nominal, _reference_resistor;
-    float _alarm_low, _alarm_high, _alarm_deadband;
+    float _alarm_low_setpoint, _alarm_high_setpoint, _alarm_deadband_setpoint;
     bool _temp_hi, _temp_lo;
 
     // Only one will be used per object, but to make this as generic as possible,
@@ -124,7 +125,7 @@ class Temperature_Sensor
     float getTemperature();
     float getRTD_temperature();
     float getTC_temperature();
-    channel_conditions status_setpoints();
-    fault_values status_faults();
+    channel_conditions_temperature status_setpoints();
+    fault_values_temperatures status_faults();
     //------------------------------------- private member methods
 };

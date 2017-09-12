@@ -75,11 +75,6 @@ DHT dht = DHT(DHTPIN, DHTTYPE);
 
 
 //configure moisture sensor
-//#define dataPin 5
-//#define clockPin 4
-//SHT1x sht1x(dataPin, clockPin);
-
-
 #define dataPin 5
 #define clockPin 4
 #define clockPulse 1
@@ -95,7 +90,7 @@ void setup()
   Serial.begin(115200);
   Serial.println("Sensors Testing Commence!\n");
 
-  dht.begin();
+  // dht.begin();
 
   //set_alarm_setpoints(alarm_low, alarm_high, alarm_deadband)
   myRTD.set_alarm_setpoints(23.0, 26.0, 0.5);
@@ -104,8 +99,8 @@ void setup()
 
   pinMode(LEDPin, OUTPUT);
 
-  sensor.configureConnection();
-  sensor.softReset();
+  // sensor.configureConnection();
+  // sensor.softReset();
 }
 
 float tempC = 0;
@@ -153,6 +148,6 @@ void loop()
 
 
 
-    delay(100);
+    //delay(100);
   }
 }
